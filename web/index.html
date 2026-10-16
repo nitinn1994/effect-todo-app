@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A minimal to-do app for the Effect To-Do API" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='8' cy='8' r='6'/></svg>" />
+    <title>Todo</title>
+    <script>
+      // Follow the operating system's light / dark setting.
+      const media = window.matchMedia("(prefers-color-scheme: dark)")
+      const apply = () => document.documentElement.classList.toggle("dark", media.matches)
+      apply()
+      media.addEventListener("change", apply)
+    </script>
+  </head>
+  <body class="bg-background text-foreground antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

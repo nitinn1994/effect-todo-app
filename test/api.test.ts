@@ -1,25 +1,27 @@
 /**
  * End-to-end tests for the HTTP API.
  *
- * `HttpRouter.toWebHandler` turns the real routes + real services + a real
+ * `HttpRouter.toWebHandler` turns the real API + real services + a real
  * in-memory SQLite database into a `fetch`-style function, so we can send
  * requests without opening a network port.
  */
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import { Layer } from "effect"
+import { NodeHttpServer } from "@effect/platform-node"
 import { HttpRouter, HttpServer } from "effect/http"
 import { AppConfig } from "../src/config.ts"
-import { ApiRoutes } from "../src/http/routes.ts"
+import { ApiLive } from "../src/http/handlers.ts"
 import { ServicesLayer } from "../src/layers.ts"
 
 let app: ReturnType<typeof makeApp>
 
 const makeApp = () =>
   HttpRouter.toWebHandler(
-    ApiRoutes.pipe(
+    ApiLive.pipe(
       Layer.provide(ServicesLayer),
       Layer.provide(AppConfig.layerWith({ databasePath: ":memory:" })),
-      Layer.provide(HttpServer.layerServices)
+      Layer.provide(HttpServer.layerServices),
+      Layer.provide(NodeHttpServer.layerHttpServices)
     ),
     { disableLogger: true }
   )
@@ -42,7 +44,8 @@ const request = async (method: string, path: string, body?: unknown) => {
     })
   )
   const text = await response.text()
-  return { status: response.status, body: text.length > 0 ? JSON.parse(text) : undefined }
+  const isJson = response.headers.get("content-type")?.includes("json") ?? false
+  return { status: response.status, body: text.length > 0 ? (isJson ? JSON.parse(text) : text) : undefined }
 }
 
 const createUser = async (name = "Ada", email = "ada@example.com") => {
@@ -76,9 +79,7 @@ describe("/users", () => {
     const { body, status } = await request("POST", "/users", { name: "", email: "not-an-email" })
     expect(status).toBe(400)
     expect(body.error).toBe("ValidationError")
-    expect(body.details).toEqual(
-      expect.arrayContaining([expect.stringContaining("name"), expect.stringContaining("email")])
-    )
+    expect(body.details).toEqual(["name: must not be empty"])
   })
 
   it("returns 400 for malformed JSON", async () => {
@@ -144,5 +145,26 @@ describe("/users/:userId/tasks", () => {
   it("rejects a task without a title", async () => {
     const user = await createUser()
     expect((await request("POST", `/users/${user.id}/tasks`, { completed: "yes" })).status).toBe(400)
+  })
+})
+
+describe("API documentation", () => {
+  it("serves an OpenAPI document generated from the API definition", async () => {
+    const { body, status } = await request("GET", "/openapi.json")
+    expect(status).toBe(200)
+    expect(body.openapi).toMatch(/^3\./)
+    expect(body.info.title).toBe("Effect To-Do API")
+    expect(Object.keys(body.paths)).toEqual(
+      expect.arrayContaining(["/health", "/users", "/users/{userId}", "/users/{userId}/tasks", "/users/{userId}/tasks/{taskId}"])
+    )
+    // Status codes come from the schemas: 201 on create, 404/409 documented as errors.
+    const createUser = body.paths["/users"].post
+    expect(Object.keys(createUser.responses)).toEqual(expect.arrayContaining(["201", "400", "409", "500"]))
+  })
+
+  it("serves Swagger UI at /docs", async () => {
+    const { body, status } = await request("GET", "/docs")
+    expect(status).toBe(200)
+    expect(body).toContain("swagger")
   })
 })

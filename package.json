@@ -16,7 +16,10 @@
     "test:watch": "vitest",
     "seed": "tsx --env-file-if-exists=.env src/seed.ts",
     "seed:prod": "node --env-file-if-exists=.env dist/seed.js",
-    "client": "tsx --env-file-if-exists=.env src/client.ts"
+    "client": "tsx --env-file-if-exists=.env src/client.ts",
+    "web:install": "npm --prefix web install",
+    "web:dev": "npm --prefix web run dev",
+    "web:build": "npm --prefix web run build"
   },
   "dependencies": {
     "@effect/platform-node": "^4.0.5",

@@ -3,13 +3,13 @@ import { NodeHttpServer, NodeRuntime } from "@effect/platform-node"
 import { Effect, Layer } from "effect"
 import { HttpRouter } from "effect/http"
 import { AppConfig } from "./config.ts"
-import { ApiRoutes } from "./http/routes.ts"
+import { ApiLive } from "./http/handlers.ts"
 import { ServicesLayer } from "./layers.ts"
 
 /**
  * Starts the HTTP server.
  *
- * `HttpRouter.serve` turns the routes into a server layer; `NodeHttpServer`
+ * `HttpRouter.serve` turns the API (plus Swagger UI) into a server layer; `NodeHttpServer`
  * provides the actual Node `http.Server`. The port comes from `AppConfig`.
  */
 const HttpServerLive = Layer.unwrap(
@@ -19,7 +19,7 @@ const HttpServerLive = Layer.unwrap(
   })
 )
 
-const Main = HttpRouter.serve(ApiRoutes).pipe(
+const Main = HttpRouter.serve(ApiLive).pipe(
   Layer.provide(ServicesLayer),
   Layer.provide(HttpServerLive),
   Layer.provide(AppConfig.layer)

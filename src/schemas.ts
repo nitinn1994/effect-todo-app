@@ -35,24 +35,24 @@ const IdFromString = Schema.FiniteFromString.pipe(
 // ---------------------------------------------------------------------------
 
 export const User = Schema.Struct({
-  id: Schema.Number,
+  id: Schema.Int,
   name: Schema.String,
   email: Schema.String,
   createdAt: Schema.String,
   updatedAt: Schema.String
-})
+}).annotate({ identifier: "User" })
 export type User = typeof User.Type
 
 export const CreateUser = Schema.Struct({
   name: Text(100),
   email: Email
-})
+}).annotate({ identifier: "CreateUser" })
 export type CreateUser = typeof CreateUser.Type
 
 export const UpdateUser = Schema.Struct({
   name: Schema.optionalKey(Text(100)),
   email: Schema.optionalKey(Email)
-})
+}).annotate({ identifier: "UpdateUser" })
 export type UpdateUser = typeof UpdateUser.Type
 
 // ---------------------------------------------------------------------------
@@ -60,28 +60,28 @@ export type UpdateUser = typeof UpdateUser.Type
 // ---------------------------------------------------------------------------
 
 export const Task = Schema.Struct({
-  id: Schema.Number,
-  userId: Schema.Number,
+  id: Schema.Int,
+  userId: Schema.Int,
   title: Schema.String,
   description: Schema.NullOr(Schema.String),
   completed: Schema.Boolean,
   createdAt: Schema.String,
   updatedAt: Schema.String
-})
+}).annotate({ identifier: "Task" })
 export type Task = typeof Task.Type
 
 export const CreateTask = Schema.Struct({
   title: Text(200),
   description: Schema.optionalKey(Schema.NullOr(Schema.String.pipe(Schema.check(Schema.isMaxLength(2000))))),
   completed: Schema.optionalKey(Schema.Boolean)
-})
+}).annotate({ identifier: "CreateTask" })
 export type CreateTask = typeof CreateTask.Type
 
 export const UpdateTask = Schema.Struct({
   title: Schema.optionalKey(Text(200)),
   description: Schema.optionalKey(Schema.NullOr(Schema.String.pipe(Schema.check(Schema.isMaxLength(2000))))),
   completed: Schema.optionalKey(Schema.Boolean)
-})
+}).annotate({ identifier: "UpdateTask" })
 export type UpdateTask = typeof UpdateTask.Type
 
 // ---------------------------------------------------------------------------
