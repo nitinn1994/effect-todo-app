@@ -1,0 +1,17 @@
+services:
+  api:
+    build: .
+    image: effect-todo-app
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      PORT: 3000
+      DATABASE_PATH: /app/data/todo.db
+    volumes:
+      # Named volume, so the database survives `docker compose down` and rebuilds.
+      - todo-data:/app/data
+    restart: unless-stopped
+    stop_grace_period: 10s
+
+volumes:
+  todo-data:

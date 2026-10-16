@@ -1,0 +1,32 @@
+{
+  "name": "effect-todo-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A small, production-minded To-Do REST API built with TypeScript, Effect and SQLite",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env src/main.ts",
+    "start": "node --env-file-if-exists=.env dist/main.js",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "seed": "tsx --env-file-if-exists=.env src/seed.ts",
+    "seed:prod": "node --env-file-if-exists=.env dist/seed.js",
+    "client": "tsx --env-file-if-exists=.env src/client.ts"
+  },
+  "dependencies": {
+    "@effect/platform-node": "^4.0.5",
+    "effect": "^4.0.5"
+  },
+  "devDependencies": {
+    "@effect/vitest": "^4.0.5",
+    "@types/node": "^24.19.2",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}
